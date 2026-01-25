@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import fsolve
+import scipy as sc
 import sympy as sp
 
 class FHN:
@@ -30,13 +30,17 @@ class FHN:
     I = sp.symbols('I')
     dv = v - (v**3/3) -  w + I
     dw = v + a - (b*w)
+    F = sp.Matrix([dv,dw])
+    var = sp.Matrix([v,w])
+    identity_matrix_float = np.identity(2)
+
 
     def f(vt,wt):
         global I_ext
         dvt = vt - (vt**3/3) - wt + I_ext
         return dvt
     
-    def g(vt,wt):
+    def w(vt,wt):
         global tau,a,b
         dwt = (1/tau)*(vt + a - (b*wt))
         return dwt
@@ -46,16 +50,31 @@ class FHN:
 
     def get_equilibrium():
         global dv,dw
-        v_e = fsolve(dv,(1,1))
-        w_e = fsolve(dw,[1,1])
+        v_e = sc.fsolve(dv,(1,1))
+        w_e = sc.fsolve(dw,[1,1])
         return v_e, w_e
     
     J = []
-    
+    J_e = []
+    #After identifying the equilibrium points, the stability can be analysed using Jacobian matrix
+
     def jacobian(v,w):
-        global J,a,b,I,dv,dw
+        global J,a,b,I,dv,dw,F,var,J_e
         J[0][0] = np.diff(dv,v)
         J[0][1] = np.diff(dv,w)
         J[1][0] = np.diff((1/tau)*dw,v)
         J[1][1] = np.diff((1/tau)*dw,w)
-        return J
+        J = F.jacobian(var)
+        J_e = J.subs(v_e,w_e)
+        return J, J_e
+
+    #Jv = lamda*v (To get eigenvalues for stability analysis)
+    #J = Jacobian Matrix
+    #v = eigenvector
+
+    def is_excitable():
+        eigenvalues = np.linalg.eigvals(J_e)
+        if (eigenvalues<0):
+            print("Stable")
+        else:
+            print("Bleh")
