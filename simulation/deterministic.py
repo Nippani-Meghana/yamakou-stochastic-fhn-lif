@@ -2,7 +2,7 @@ import numpy as np
 from pathlib import Path
 import json
 
-import Models.FHN as fhn 
+from Models.FHN import FHN
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # points to project/
 json_path = BASE_DIR / "config" / "fhn_params.json"
@@ -16,10 +16,29 @@ a = params["fhn_parameters"]["a"]
 b = params["fhn_parameters"]["b"]
 tau = params["fhn_parameters"]["tau"]
 
-v = np.linspace(-2.5,2.5,400)
-w = np.linspace(-1,2,400)
-V,W = np.meshgrid(v,w)
+dt = 0.01        # timestep
+T = 1000           # total time
+steps = int(T/dt)
 
-dV = f(V,W)
-dW = w(V,W)
+v = np.zeros(steps)
+w = np.zeros(steps)
+t = np.linspace(0, T, steps)
 
+neuron = FHN(a, b, tau, I_ext)
+
+# Initial conditions
+v[0] = -1
+w[0] = 0
+
+# Time evolution loop
+for i in range(1, steps):
+    v[i] = v[i-1] + neuron.f(v[i-1], w[i-1])*dt
+    w[i] = w[i-1] + neuron.g(v[i-1], w[i-1])*dt
+
+print("v values:",v)
+print("w values:",w)
+v_e, w_e = neuron.get_equilibrium()  
+print("Equilibrium function:", (v_e, w_e))
+J, J_e = neuron.jacobian()
+print("Jacobian Function:", J_e)
+neuron.is_excitable()
