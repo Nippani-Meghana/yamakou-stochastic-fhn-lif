@@ -35,8 +35,10 @@ t = np.linspace(0, T, steps)
 neuron = FHN(a, b, tau, I_ext)
 
 # Initial conditions
-v[0] = -1
-w[0] = -0
+v[0] = -1.00125
+w[0] = -0.46  #M.E. Yamakou et al. paper Fig.1 shows two trajectories w = -0.45, -0.46
+#A large "action potential" loop starting at w = -0.46
+#A small sub-threshold oscillation starting at w = -0.45
 
 # Time evolution loop
 for i in range(1, steps):
@@ -48,14 +50,17 @@ v_e, w_e = neuron.get_equilibrium()
 V = np.linspace(-3,3,400)
 W = np.linspace(-1.0,1.5,400)
 
-v_null = V - ((V**3)/3) + 0.265
-w_null = (V + 0.7)/0.75
+v_null = V - ((V**3)/3) + I_ext
+w_null = (V + a)/b
+
 fig, ax = plt.subplots()
 
+ax.plot(v, w, color='blue')
 ax.plot(V, v_null, label = 'v-nullcline',color = 'lightpink')
 ax.plot(V, w_null, label = 'w-nullcline',color = '#EFBF04')
 ax.plot(v_e, w_e, 'ro', markersize=8, label=f'Eq Point ({v_e}, {w_e})')
 ax.set_ylim(-1.0, 1.5)
+
 ax.set_xlabel('v (membrane potential)')
 ax.set_ylabel('w (recovery variable)')
 ax.set_title('Phase Plane Portrait')
