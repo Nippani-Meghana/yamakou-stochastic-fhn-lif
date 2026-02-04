@@ -17,7 +17,6 @@ def spikes_fhn():
     print("Number of spikes:", len(spike_times))
   
 
-
 spikes_fhn()
 
     
