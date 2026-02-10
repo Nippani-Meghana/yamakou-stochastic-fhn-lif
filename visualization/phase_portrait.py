@@ -5,32 +5,18 @@ import simulation
 
 I_ext,a,b,tau = simulation.path_calling()
 
-dt = 0.01        # timestep
-T = 1000           # total time
-steps = int(T/dt)
-
-v = np.zeros(steps)
-w = np.zeros(steps)
-t = np.linspace(0, T, steps)
 neuron = FHN(a, b, tau, I_ext)
 
 def det_phase_portrait():
-    v,w,v_e,w_e,J_e = simulation.deterministic()
-
-    # Initial conditions
-    v[0] = -1.00125
-    w[0] = -0.46  #M.E. Yamakou et al. paper Fig.1 shows two trajectories w = -0.45, -0.46
+    #M.E. Yamakou et al. paper Fig.1 shows two trajectories w = -0.45, -0.46
     #A large "action potential" loop starting at w = -0.46
     #A small sub-threshold oscillation starting at w = -0.45
+    v,w,v_e,w_e,J_e = simulation.deterministic(-1.00125,-0.46)
 
     return v,w,v_e,w_e
 
 def add_noise_phase_portrait():
-    v,w,v_e,w_e,J_e = simulation.additive_noise()
-
-    #initial conditions
-    v[0] = -1.00125
-    w[0] = -0.4
+    v,w,v_e,w_e,J_e = simulation.additive_noise(-1.00125,-0.4)
 
     return v,w,v_e,w_e
 
