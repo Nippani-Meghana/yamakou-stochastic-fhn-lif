@@ -3,7 +3,7 @@ from Models.FHN import FHN
 from simulation import path_calling
 
 
-def deterministic():
+def deterministic(v0,w0):
     I_ext,a,b,tau =path_calling()
 
     dt = 0.01        # timestep
@@ -17,8 +17,8 @@ def deterministic():
     neuron = FHN(a, b, tau, I_ext)
 
     # Initial conditions
-    v[0] = -1.00125
-    w[0] = -0.46
+    v[0] = v0
+    w[0] = w0
 
     # Time evolution loop
     for i in range(1, steps):
