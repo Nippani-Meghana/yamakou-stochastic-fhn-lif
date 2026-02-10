@@ -1,29 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
-import json
 from Models.FHN import FHN
+import simulation
 
-# BASE_DIR = Path(__file__).resolve().parent.parent
-# __file__ is the path to the current Python script.
-# Path(__file__).resolve() converts it into an absolute path.
-# .parent goes one folder up. .parent.parent goes two folders up.
-BASE_DIR = Path(__file__).resolve().parent.parent  # points to project/
-
-# This uses Python’s pathlib “/” operator to join paths safely.
-json_path = BASE_DIR / "config" / "fhn_params.json"
-
-# Opens the JSON file for reading. The with statement ensures it automatically closes afterward.
-with open(json_path) as f:
-# Reads the JSON file and converts it into a Python dictionary (dict).
-    params = json.load(f)
-
-    
-# Access parameters
-I_ext = params["fhn_parameters"]["I_ext"]
-a = params["fhn_parameters"]["a"]
-b = params["fhn_parameters"]["b"]
-tau = params["fhn_parameters"]["tau"]
+I_ext,a,b,tau = simulation.path_calling()
 
 dt = 0.01        # timestep
 T = 1000           # total time
@@ -34,18 +14,37 @@ w = np.zeros(steps)
 t = np.linspace(0, T, steps)
 neuron = FHN(a, b, tau, I_ext)
 
-# Initial conditions
-v[0] = -1.00125
-w[0] = -0.46  #M.E. Yamakou et al. paper Fig.1 shows two trajectories w = -0.45, -0.46
-#A large "action potential" loop starting at w = -0.46
-#A small sub-threshold oscillation starting at w = -0.45
+def det_phase_portrait():
+    v,w,v_e,w_e,J_e = simulation.deterministic()
 
-# Time evolution loop
-for i in range(1, steps):
-    v[i] = v[i-1] + neuron.f(v[i-1], w[i-1])*dt
-    w[i] = w[i-1] + neuron.g(v[i-1], w[i-1])*dt
+    # Initial conditions
+    v[0] = -1.00125
+    w[0] = -0.46  #M.E. Yamakou et al. paper Fig.1 shows two trajectories w = -0.45, -0.46
+    #A large "action potential" loop starting at w = -0.46
+    #A small sub-threshold oscillation starting at w = -0.45
 
-v_e, w_e = neuron.get_equilibrium()  
+    return v,w,v_e,w_e
+
+def add_noise_phase_portrait():
+    v,w,v_e,w_e,J_e = simulation.additive_noise()
+
+    #initial conditions
+    v[0] = -1.00125
+    w[0] = -0.4
+
+    return v,w,v_e,w_e
+
+print("====DASHBOARD====")
+print("1. Deterministic FHN")
+print("2. Stochastive Additive FHN")
+print("3. Stochastive Multiplicative FHN")
+ch = int(input('Please make your choice: '))
+if(ch == 1):
+    v,w,v_e,w_e = det_phase_portrait()
+elif(ch == 2):
+    v,w,v_e,w_e = add_noise_phase_portrait()
+else:
+    print("Invalid Choice!")
 
 V = np.linspace(-3,3,400)
 W = np.linspace(-1.0,1.5,400)
