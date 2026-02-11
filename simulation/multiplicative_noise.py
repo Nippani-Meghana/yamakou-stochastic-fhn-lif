@@ -40,14 +40,14 @@ def multiplicative_noise(v0,w0):
         v_predictor = v[i-1] + neuron.f(v[i-1], w[i-1])*dt
         w_predictor = w[i-1] + neuron.g(v[i-1], w[i-1]) * dt + (sigma*delta_B*w[i-1])
         v[i] = v[i-1] + (1/2)*((neuron.f(v[i-1], w[i-1])) + (neuron.f(v_predictor, w_predictor)))*dt
-        w[i] = w[i-1] +(1/2)*((neuron.g(v[i-1], w[i-1]))+(neuron.g(v_predictor, w_predictor)))*dt + (1/2)*sigma*(w[i-1]+w_predictor)*delta_B
+        w[i] = w[i-1] +(1/2)*((neuron.g(v[i-1], w[i-1])) + (neuron.g(v_predictor, w_predictor)))*dt + (1/2)*sigma*(w[i-1]+w_predictor)*delta_B
 
-    print("v values:",v)
-    print("w values:",w)
+    #print("v values:",v)
+    #print("w values:",w)
     v_e, w_e = neuron.get_equilibrium()  
-    print("Equilibrium function:", (v_e, w_e))
+    #print("Equilibrium function:", (v_e, w_e))
     J, J_e = neuron.jacobian()
-    print("Jacobian Function:", J_e)
+    #print("Jacobian Function:", J_e)
     neuron.is_excitable()
 
     return v,w,v_e,w_e,J_e

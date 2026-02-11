@@ -25,12 +25,12 @@ def deterministic(v0,w0):
         v[i] = v[i-1] + neuron.f(v[i-1], w[i-1])*dt
         w[i] = w[i-1] + neuron.g(v[i-1], w[i-1])*dt
 
-    print("v values:",v)
-    print("w values:",w)
+    #print("v values:",v)
+    #print("w values:",w)
     v_e, w_e = neuron.get_equilibrium()  
-    print("Equilibrium function:", (v_e, w_e))
+    #print("Equilibrium function:", (v_e, w_e))
     J, J_e = neuron.jacobian()
-    print("Jacobian Function:", J_e)
+    #print("Jacobian Function:", J_e)
     neuron.is_excitable()
 
     return v,w,v_e,w_e,J_e
