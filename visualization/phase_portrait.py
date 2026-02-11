@@ -20,6 +20,23 @@ def add_noise_phase_portrait():
 
     return v,w,v_e,w_e
 
+def mult_noise_phase_portrait():
+    """
+    Why use SRK (Heun) instead of Euler?
+    While the Euler-Maruyama method used for additive noise, multiplicative noise 
+    (where noise is sigma*w*dW) makes the system much more sensitive.
+
+    The Problem: In Euler methods, the noise is only calculated at the start of the step. 
+    If the value of w changes significantly during dt, the noise term becomes inaccurate.
+
+    The Solution: SRK takes a "predictor" step to see where the system is headed, then uses 
+    that future value to "correct" the noise and drift estimates.
+    """
+    v,w,v_e,w_e,J_e = simulation.multiplicative_noise(-1.00125,-0.4)
+
+    return v,w,v_e,w_e
+
+
 print("====DASHBOARD====")
 print("1. Deterministic FHN")
 print("2. Stochastive Additive FHN")
@@ -29,6 +46,8 @@ if(ch == 1):
     v,w,v_e,w_e = det_phase_portrait()
 elif(ch == 2):
     v,w,v_e,w_e = add_noise_phase_portrait()
+elif (ch == 3):
+    v,w,v_e,w_e = mult_noise_phase_portrait()
 else:
     print("Invalid Choice!")
 

@@ -8,9 +8,11 @@ def spikes_fhn():
     print("3. Stochastive Multiplicative FHN")
     ch = int(input('Please make your choice: '))
     if(ch == 1):
-        v,w,v_e,w_e,J_e = simulation.deterministic()
+        v,w,v_e,w_e,J_e = simulation.deterministic(-1.00125,-0.46)
     elif(ch == 2):
-        v,w,v_e,w_e,J_e = simulation.additive_noise()
+        v,w,v_e,w_e,J_e = simulation.additive_noise(-1.00125,-0.4)
+    elif(ch == 3):
+        v,w,v_e,w_e,J_e = simulation.multiplicative_noise(-1.00125,-0.4)
     else:
         print("Invalid Choice!")
     v_th = -0.7
