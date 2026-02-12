@@ -3,37 +3,39 @@ import simulation
 
 class ensemble_stats:
     """
-    A class to perform ensemble statistical analysis on the FitzHugh-Nagumo (FHN) model.
-    
-    This class automates multiple simulation trials to analyze the stochastic 
-    behavior of neural firing, specifically calculating Inter-Spike Intervals (ISI) 
-    and spike variability across independent runs.
+        A class to perform ensemble statistical analysis on the FitzHugh-Nagumo (FHN) model.
+        
+        This class automates multiple simulation trials to analyze the stochastic 
+        behavior of neural firing, specifically calculating Inter-Spike Intervals (ISI) 
+        and spike variability across independent runs.
     """
     def __init__(self):
         pass
 
-    def trials(self):
+    def trials_stats(self,ch):
         """
-        Executes a batch of 100 simulation trials based on user selection.
+        Executes 100 simulation trials and calculates aggregate firing statistics.
         
-        This method manages the ensemble execution loop, collecting data from 
-        either deterministic, additive stochastic, or multiplicative stochastic 
-        simulations. 
+        This method manages the ensemble execution loop and processes the resulting 
+        spike data to compute the Inter-Spike Interval (ISI) distribution, 
+        Coefficient of Variation (CV), and Fano Factor.
+
+        Args:
+            ch (int): The simulation type (1: Deterministic, 2: Additive, 3: Multiplicative).
         
         Returns:
-            tuple: (trial_spike_count_dict, trial_spike_timing_dict)
-                - trial_spike_count_dict: Mapping of trial IDs to total spikes detected.
-                - trial_spike_timing_dict: Mapping of trial IDs to lists of spike indices.
+            tuple: 
+                - trial_spike_count_dict (dict): Spikes per trial ID.
+                - trial_spike_timing_dict (dict): Timesteps of spikes per trial ID.
+                - all_isi (list): Flattened list of all inter-spike intervals across all trials.
+                - cv (float): Mean Coefficient of Variation (variability of timing).
+                - fano_factor (float): Fano Factor (variability of spike counts).
         """
-        print("====DASHBOARD====")
-        print("1. Deterministic FHN")
-        print("2. Stochastive Additive FHN")
-        print("3. Stochastive Multiplicative FHN")
-        ch = int(input('Please make your choice: '))
 
         trial_spike_timing_dict = {}
         trial_spike_count_dict = {}
 
+        # 1. Ensemble Execution: Collect raw data over 100 independent trials
         for i in range(1,101):
             if i % 10 == 0:  # This will give an update every 10 trials
                 print(f"Simulation in progress: {i}% complete...")
@@ -41,8 +43,32 @@ class ensemble_stats:
             trial_spike_timing_dict[i] = trial_data
             trial_spike_count_dict[i] = len(trial_data)
 
+        # 2. Data Preparation for Statistical Analysis
+        spike_trials = list(trial_spike_timing_dict.values())
+        counts = np.array(list(trial_spike_count_dict.values()))
 
-        return trial_spike_count_dict, trial_spike_timing_dict
+        all_isi = []  # Master list of all intervals across the ensemble
+        cv_trial = []  # List of CV values calculated per individual trial
+
+        # 3. ISI and CV Calculation
+        # Iterate through trials to find the intervals between spikes
+        for trial in spike_trials:
+            if len(trial) > 1:
+                isi_trial = np.diff(trial)
+                cv_trial.append(np.std(isi_trial)/np.mean(isi_trial))
+                all_isi.extend(isi_trial)
+
+        if len(cv_trial) > 0:
+            cv = np.mean(cv_trial)
+        else:
+            cv = None
+
+        if np.mean(counts) > 0:
+            fano_factor = np.var(counts) / np.mean(counts)
+        else:
+            fano_factor = None
+
+        return trial_spike_count_dict, trial_spike_timing_dict, all_isi,cv,fano_factor
 
     def spikes_fhn(self,ch):
         """
@@ -77,4 +103,9 @@ class ensemble_stats:
         #print("Spike Times: ",spike_times)
 
         return spike_times
+    
+
+
+
+
 
