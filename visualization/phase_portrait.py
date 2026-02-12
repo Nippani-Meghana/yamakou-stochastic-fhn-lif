@@ -8,6 +8,14 @@ I_ext,a,b,tau = simulation.path_calling()
 neuron = FHN(a, b, tau, I_ext)
 
 def det_phase_portrait():
+    """
+    Generates deterministic trajectories to verify the excitable regime.
+    
+    Reflects Figure 1 of M.E. Yamakou et al., where a slight change in 
+    initial conditions (w = -0.45 vs -0.46) separates sub-threshold 
+    oscillations from full action potential loops.
+    """
+
     #M.E. Yamakou et al. paper Fig.1 shows two trajectories w = -0.45, -0.46
     #A large "action potential" loop starting at w = -0.46
     #A small sub-threshold oscillation starting at w = -0.45
@@ -16,6 +24,12 @@ def det_phase_portrait():
     return v,w,v_e,w_e
 
 def add_noise_phase_portrait():
+    """
+    Generates trajectories driven by additive stochastic noise.
+    
+    Captures the 'fuzzy' limit cycle where constant random fluctuations 
+    force the system out of the stable fixed point into noise-induced spikes.
+    """
     v,w,v_e,w_e,J_e = simulation.additive_noise(-1.00125,-0.4)
 
     return v,w,v_e,w_e
@@ -54,6 +68,7 @@ else:
 V = np.linspace(-3,3,400)
 W = np.linspace(-1.0,1.5,400)
 
+# Calculate Nullclines: Where dv/dt = 0 (cubic) and dw/dt = 0 (linear)
 v_null = V - ((V**3)/3) + I_ext
 w_null = (V + a)/b
 

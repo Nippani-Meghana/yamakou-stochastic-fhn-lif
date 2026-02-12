@@ -2,10 +2,29 @@ import numpy as np
 import simulation
 
 class ensemble_stats:
+    """
+    A class to perform ensemble statistical analysis on the FitzHugh-Nagumo (FHN) model.
+    
+    This class automates multiple simulation trials to analyze the stochastic 
+    behavior of neural firing, specifically calculating Inter-Spike Intervals (ISI) 
+    and spike variability across independent runs.
+    """
     def __init__(self):
         pass
 
     def trials(self):
+        """
+        Executes a batch of 100 simulation trials based on user selection.
+        
+        This method manages the ensemble execution loop, collecting data from 
+        either deterministic, additive stochastic, or multiplicative stochastic 
+        simulations. 
+        
+        Returns:
+            tuple: (trial_spike_count_dict, trial_spike_timing_dict)
+                - trial_spike_count_dict: Mapping of trial IDs to total spikes detected.
+                - trial_spike_timing_dict: Mapping of trial IDs to lists of spike indices.
+        """
         print("====DASHBOARD====")
         print("1. Deterministic FHN")
         print("2. Stochastive Additive FHN")
@@ -26,6 +45,18 @@ class ensemble_stats:
         return trial_spike_count_dict, trial_spike_timing_dict
 
     def spikes_fhn(self,ch):
+        """
+        Runs a single FHN simulation and detects action potentials (spikes).
+        
+        Spike detection uses a fixed threshold to identify all-or-nothing 
+        neural excursions while filtering out sub-threshold noise.
+        
+        Args:
+            ch (int): The simulation type (1: Deterministic, 2: Additive, 3: Multiplicative).
+            
+        Returns:
+            list: A list of indices (timesteps) where a spike was detected.
+        """
         if(ch == 1):
             v,w,v_e,w_e,J_e = simulation.deterministic(-1.00125,-0.46)
         elif(ch == 2):
