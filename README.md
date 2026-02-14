@@ -1,4 +1,4 @@
-# FHN_LIF: Stochastic FitzHugh-Nagumo Model and Embedded LIF Analysis
+# Stochastic FitzHugh-Nagumo Model and Embedded LIF Analysis
 
 A Python implementation replicating the computational work from Yamakou et al. (2019), "The stochastic FitzHugh-Nagumo neuron model in the excitable regime embeds a leaky integrate-and-fire model."
 
