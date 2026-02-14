@@ -1,214 +1,179 @@
-# FHN_LIF
+# FHN_LIF: Stochastic FitzHugh-Nagumo Model and Embedded LIF Analysis
 
-## Project Overview
+A Python implementation replicating the computational work from Yamakou et al. (2019), "The stochastic FitzHugh-Nagumo neuron model in the excitable regime embeds a leaky integrate-and-fire model."
 
-This project implements deterministic and stochastic versions of the FitzHugh–Nagumo (FHN) neuron model in the excitable regime, with the goal of replicating and exploring the results presented in:
+## Overview
 
-Marius E. Yamakou, Tat Dat Tran, Luu Hoang Duc, Jürgen Jost
-"The stochastic FitzHugh–Nagumo neuron model in the excitable regime embeds a leaky integrate-and-fire model"
+This project explores how stochastic noise influences neural firing in the excitable regime of the FitzHugh-Nagumo (FHN) model and demonstrates how this complex biophysical model can be reduced to a simpler Leaky Integrate-and-Fire (LIF) model while preserving key statistical properties of spike timing.
 
-The repository provides:
+### Key Concepts
 
-* A clean object-oriented implementation of the FHN model
-* Deterministic and stochastic simulation modules
-* Additive and multiplicative noise implementations
-* Phase plane visualization tools
-* Ensemble-based spike statistics analysis
-* Centralized configuration management
+**Excitable Regime**: The FHN model is parameterized such that it rests at a stable fixed point unless perturbed. In this regime, the neuron does not fire spontaneously but can be driven to spike by noise or external input.
 
-The structure is modular to allow extension toward more advanced stochastic analysis, LIF embedding comparisons, and parameter exploration.
+**Stochastic Resonance**: Background noise, rather than disrupting neural function, can actually induce regular firing patterns through a phenomenon known as coherence resonance.
 
----
-
-## Scientific Context
-
-The FitzHugh–Nagumo model is a two-dimensional reduction of the Hodgkin–Huxley equations:
-
-* v: fast membrane potential variable
-* w: slow recovery (adaptation) variable
-
-In the excitable regime, the system has a stable equilibrium. However, sufficiently large perturbations (or noise) can drive the system through a large excursion resembling an action potential.
-
-The referenced paper demonstrates that in this regime, the stochastic FHN model effectively embeds a leaky integrate-and-fire (LIF) model. This project provides numerical infrastructure to:
-
-* Simulate deterministic baseline dynamics
-* Add additive noise (Euler–Maruyama)
-* Add multiplicative noise (Stochastic Runge–Kutta / Heun)
-* Detect spikes via threshold crossing
-* Perform ensemble spike statistics
-
----
+**Model Embedding**: The paper demonstrates that a properly parameterized LIF model can reproduce the inter-spike interval (ISI) statistics of the stochastic FHN model, providing a computationally cheaper alternative.
 
 ## Project Structure
 
 ```
-FHN_LIF
-│
-├── Models
+FHN_LIF/
+├── Models/
 │   ├── __init__.py
-│   └── FHN.py
-│
-├── simulation
+│   └── FHN.py                  # Core FitzHugh-Nagumo dynamics
+├── simulation/
 │   ├── __init__.py
-│   ├── deterministic.py
-│   ├── additive_noise.py
-│   ├── multiplicative_noise.py
-│   └── path_calling.py
-│
-├── visualization
-│   ├── phase_portrait.py
-│   └── timeseries.py
-│
-├── analysis
+│   ├── deterministic.py        # Euler method integration
+│   ├── additive_noise.py       # Euler-Maruyama method
+│   ├── multiplicative_noise.py # Stochastic Runge-Kutta (Heun)
+│   └── path_calling.py         # Configuration loader
+├── visualization/
+│   ├── phase_portrait.py       # Phase plane analysis
+│   └── timeseries.py           # Temporal dynamics
+├── analysis/
 │   ├── __init__.py
-│   └── ensemble_stats.py
-│
-├── config
-│   └── fhn_params.json
-│
-└── main.py
+│   └── ensemble_stats.py       # ISI, CV, Fano factor computation
+├── config/
+│   └── fhn_params.json         # Model parameters
+└── main.py                      # Interactive dashboard
 ```
 
----
+## Mathematical Background
 
-## Core Components
+### FitzHugh-Nagumo Equations
 
-### 1. Models/FHN.py
-
-Defines the FitzHugh–Nagumo system:
-
-Equations:
+The deterministic FHN model consists of two coupled ordinary differential equations:
 
 ```
-dv/dt = v − v^3/3 − w + I_ext
-dw/dt = (1/τ)(v + a − b w)
-```
-
-Features:
-
-* Drift functions f(v, w) and g(v, w)
-* Numerical equilibrium computation using `fsolve`
-* Symbolic Jacobian computation using SymPy
-* Stability analysis via eigenvalues
-
-This class is the core dynamical engine used by all simulation modules.
-
----
-
-### 2. simulation/
-
-All time evolution routines are separated from model definition.
-
-#### deterministic.py
-
-* Standard Euler method for ODE integration
-* Provides baseline excitable regime trajectory
-* Returns:
-
-  * v(t), w(t)
-  * equilibrium point
-  * Jacobian evaluated at equilibrium
-
-Used for verifying fixed-point stability and deterministic threshold behavior.
-
----
-
-#### additive_noise.py
-
-Implements Euler–Maruyama method for SDEs:
-
-```
-w(t+dt) = w(t) + g(v,w) dt + σ dW
+dv/dt = v - (v³/3) - w + I_ext
+dw/dt = (1/τ)(v + a - bw)
 ```
 
 Where:
+- `v`: Fast variable (membrane potential)
+- `w`: Slow variable (recovery/adaptation)
+- `τ`: Time scale separation parameter
+- `I_ext`: External current
+- `a, b`: Shape parameters
 
-* dW ~ N(0, sqrt(dt))
-* Noise is independent of state
+### Stochastic Extensions
 
-Purpose:
-
-* Study noise-induced spiking
-* Examine escape from stable fixed point
-* Compare spike variability to LIF behavior
-
----
-
-#### multiplicative_noise.py
-
-Implements second-order Stochastic Runge–Kutta (Heun method):
-
-* Noise term scales with state variable w
-* Predictor-corrector structure
-* Increased numerical stability for state-dependent noise
-
-Used to study more realistic stochastic modulation of recovery dynamics.
-
----
-
-#### path_calling.py
-
-Centralized configuration loader.
-
-Reads model parameters from:
-
+**Additive Noise** (constant background fluctuations):
 ```
-config/fhn_params.json
+dw = (1/τ)(v + a - bw)dt + σ dW
 ```
 
-Ensures all simulations use consistent parameter values.
-
----
-
-### 3. visualization/
-
-#### phase_portrait.py
-
-Generates:
-
-* Phase plane trajectories
-* v-nullcline (cubic)
-* w-nullcline (linear)
-* Equilibrium point
-
-Allows reproduction of excitable vs subthreshold trajectories similar to Figure 1 of the referenced paper.
-
-Noise-driven phase portraits illustrate the stochastic deformation of trajectories.
-
----
-
-### 4. analysis/
-
-#### ensemble_stats.py
-
-Performs ensemble-based statistical analysis:
-
-* Runs 100 independent trials
-* Spike detection via upward threshold crossing
-* Returns:
-
-  * Spike count per trial
-  * Spike timing indices per trial
-
-Spike detection rule:
-
+**Multiplicative Noise** (state-dependent fluctuations):
 ```
-v[i-1] < v_threshold and v[i] >= v_threshold
+dw = (1/τ)(v + a - bw)dt + σw dW
 ```
 
-This provides:
+Where `dW` represents a Wiener process (Brownian motion).
 
-* Inter-spike interval extraction
-* Spike count variability
-* Statistical comparison across deterministic and stochastic regimes
+## Implementation Details
 
----
+### Numerical Methods
 
-### 5. config/fhn_params.json
+**Deterministic Integration**: Standard Euler method with timestep `dt = 0.01`
 
-Central parameter file:
+**Additive Noise**: Euler-Maruyama method
+- Noise term: `σ * N(0,1) * √dt`
+- The `√dt` scaling ensures proper Brownian motion variance
 
+**Multiplicative Noise**: Second-order Stochastic Runge-Kutta (Heun's method)
+- Uses predictor-corrector approach
+- Necessary for numerical stability when noise scales with state variable
+- More accurate than Euler-Maruyama for state-dependent noise
+
+### Spike Detection
+
+Spikes are detected using an upward threshold crossing at `v_th = -0.55`. When the membrane potential crosses this threshold from below, a spike is registered.
+
+### Statistical Analysis
+
+**Inter-Spike Interval (ISI)**: Time between consecutive spikes
+- Computed from spike timing arrays
+- Distribution characterizes firing regularity
+
+**Coefficient of Variation (CV)**: `σ_ISI / μ_ISI`
+- CV ≈ 0: Regular firing (clock-like)
+- CV ≈ 1: Poisson-like (random)
+- CV > 1: Bursty or irregular
+
+**Fano Factor**: `Var(spike_count) / Mean(spike_count)`
+- Measures trial-to-trial variability
+- FF = 1 for Poisson process
+- FF > 1 indicates overdispersion
+
+## Current Implementation Status
+
+### Completed
+- Core FHN model with equilibrium and stability analysis
+- Deterministic simulation (Euler method)
+- Stochastic simulations (Euler-Maruyama and SRK methods)
+- Phase plane visualization with nullclines
+- Time series plotting
+- Ensemble statistics framework (100 trials)
+- ISI, CV, and Fano factor computation
+- Interactive command-line dashboard
+
+### In Progress
+1. ISI distribution histograms
+2. Embedded LIF model implementation
+3. Quantitative comparison (FHN vs LIF)
+4. Power spectral density analysis
+5. Firing probability vs. noise intensity curves
+
+## Installation
+
+### Prerequisites
+```bash
+Python 3.8+
+numpy
+scipy
+matplotlib
+sympy
 ```
+
+### Setup
+```bash
+git clone 
+cd FHN_LIF
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Interactive Mode
+
+Run the main dashboard:
+```bash
+python main.py
+```
+
+You will be presented with options to:
+1. Choose simulation type (deterministic, additive noise, multiplicative noise)
+2. Set noise intensity (sigma) for stochastic models
+3. Select visualization (phase portrait, ensemble stats, time series)
+
+### Example: Running Ensemble Analysis
+
+```python
+from analysis.ensemble_stats import ensemble_stats
+
+stats = ensemble_stats()
+
+# Choice 2 = additive noise simulation
+count, timing, isi, cv, fano = stats.trials_stats(ch=2)
+
+print(f"Mean CV: {cv}")
+print(f"Fano Factor: {fano}")
+```
+
+### Configuration
+
+Model parameters are stored in `config/fhn_params.json`:
+```json
 {
   "fhn_parameters": {
     "I_ext": 0.265,
@@ -219,137 +184,68 @@ Central parameter file:
 }
 ```
 
-Encourages reproducibility and easy parameter sweeps.
+These values place the system in the excitable regime as specified in Yamakou et al.
 
----
+## Key Results to Replicate
 
-## How to Run
+From the original paper, the project aims to reproduce:
 
-### Run ensemble statistics
+1. **Phase portraits showing excitability**: Small perturbations return to equilibrium; larger ones trigger full action potentials
 
-From project root:
+2. **Noise-induced firing**: Stochastic fluctuations can drive regular spiking even when the deterministic system is stable
 
-```
-python main.py
-```
+3. **ISI statistics**: Both FHN and embedded LIF should produce similar ISI distributions
 
-You will be prompted to choose:
+4. **Coherence resonance**: Optimal noise level where firing becomes most regular (minimum CV)
 
-1. Deterministic FHN
-2. Stochastic Additive FHN
-3. Stochastic Multiplicative FHN
+## Scientific Context
 
-The program will execute 100 trials and output spike counts.
+The FHN model is a simplified version of the Hodgkin-Huxley equations, retaining essential excitable dynamics while being analytically tractable. Understanding how stochastic FHN maps to LIF is important because:
 
----
+- **Computational efficiency**: LIF is much faster to simulate in large networks
+- **Theoretical insight**: Shows which features of complex models are essential for spike statistics
+- **Biological relevance**: Real neurons operate in noisy environments
 
-### Run phase portrait visualization
+## References
 
-Execute:
+**Primary Source**:
+Yamakou, M.E., Tran, T.D., Duc, L.H., Jost, J. (2019). The stochastic Fitzhugh–Nagumo neuron model in the excitable regime embeds a leaky integrate-and-fire model. *Journal of Mathematical Biology*, 79, 509–532. [https://doi.org/10.1007/s00285-019-01366-z](https://doi.org/10.1007/s00285-019-01366-z)
 
-```
-python visualization/phase_portrait.py
-```
+**Additional Reading**:
+- FitzHugh, R. (1961). Impulses and Physiological States in Theoretical Models of Nerve Membrane. *Biophysical Journal*, 1(6), 445–466.
+- Nagumo, J., Arimoto, S., Yoshizawa, S. (1962). An Active Pulse Transmission Line Simulating Nerve Axon. *Proceedings of the IRE*, 50(10), 2061–2070.
 
-You will be prompted to select the simulation type.
+## Learning Resources
 
-A phase plane plot with nullclines and equilibrium will be displayed.
+For those new to computational neuroscience:
 
----
+**Stochastic Differential Equations**:
+- Understanding the difference between Itô and Stratonovich interpretation
+- Why `√dt` scaling is necessary for Brownian motion
+- When to use Euler-Maruyama vs. higher-order methods
 
-## Numerical Methods Summary
+**Phase Plane Analysis**:
+- Nullclines represent curves where dv/dt = 0 or dw/dt = 0
+- Fixed points occur at nullcline intersections
+- Stability determined by Jacobian eigenvalues at fixed points
 
-| Model Type     | Method Used          |
-| -------------- | -------------------- |
-| Deterministic  | Euler method         |
-| Additive Noise | Euler–Maruyama       |
-| Multiplicative | Stochastic RK (Heun) |
+**Excitability**:
+- Threshold behavior: small perturbations decay, large ones trigger spikes
+- All-or-nothing response characteristic of neurons
+- Refractory period: temporary inability to spike again
 
-Time step:
+## Project Status
 
-```
-dt = 0.01
-```
+This is an active learning project documenting the implementation process. The code is functional but under development. Feedback and contributions are welcome.
 
-Total simulation time:
+## Author
 
-```
-T = 1000
-```
+Second-year undergraduate student in Computer Science and Engineering (IoT), self-teaching computational neuroscience.
 
----
+## License
 
-## Relation to LIF Embedding
+This project is for educational purposes. The original research is credited to Yamakou et al. (2019).
 
-In the excitable regime:
+## Acknowledgments
 
-* The deterministic FHN model has a stable fixed point.
-* Noise triggers large excursions.
-* The inter-spike intervals resemble those of a leaky integrate-and-fire model.
-
-This implementation allows:
-
-* Empirical verification of spike timing variability
-* Exploration of escape dynamics
-* Study of noise scaling effects
-
-Future work may include:
-
-* Direct LIF model implementation for comparison
-* First passage time analysis
-* Reduced 1D projection near fixed point
-* Fokker–Planck approximation
-
----
-
-## Design Philosophy
-
-The repository separates:
-
-* Mathematical model definition
-* Numerical integration schemes
-* Visualization
-* Statistical analysis
-* Configuration
-
-This modularity enables:
-
-* Easy substitution of integrators
-* Parameter sweeps
-* Extension to other neuron models
-* Testing stochastic numerical stability
-
----
-
-## Suggested Extensions
-
-1. Add reproducible random seeds
-2. Implement ISI histogram plotting
-3. Add coefficient of variation (CV) calculation
-4. Compare to analytical LIF statistics
-
----
-
-## Dependencies
-
-* numpy
-* scipy
-* sympy
-* matplotlib
-* json
-* pathlib
-
-Install with:
-
-```
-pip install numpy scipy sympy matplotlib
-```
-
----
-
-## Final Notes
-
-This codebase is designed not just to simulate the FHN model, but to serve as a controlled computational framework for investigating how stochastic excitable systems reduce to simpler integrate-and-fire descriptions.
-
-Careful numerical method choice is essential, especially for multiplicative noise. The separation of deterministic and stochastic solvers allows direct methodological comparison.
-
+This implementation was developed as part of independent study in computational neuroscience, following the methodology described in the original paper. Special thanks to the authors for providing clear mathematical formulations that enable reproducibility.
