@@ -1,5 +1,6 @@
 import numpy as np
 import simulation
+from simulation.path_calling import path_calling_lif
 
 class ensemble_stats:
     """
@@ -12,7 +13,7 @@ class ensemble_stats:
     def __init__(self):
         pass
 
-    def trials_stats(self,ch):
+    def trials_stats(self,ch, sigma):
         """
         Executes 100 simulation trials and calculates aggregate firing statistics.
         
@@ -39,7 +40,7 @@ class ensemble_stats:
         for i in range(1,101):
             if i % 10 == 0:  # This will give an update every 10 trials
                 print(f"Simulation in progress: {i}% complete...")
-            trial_data = self.spikes_fhn(ch)
+            trial_data = self.spikes(ch,sigma)
             trial_spike_timing_dict[i] = trial_data
             trial_spike_count_dict[i] = len(trial_data)
 
@@ -70,7 +71,7 @@ class ensemble_stats:
 
         return trial_spike_count_dict, trial_spike_timing_dict, all_isi,cv,fano_factor
 
-    def spikes_fhn(self,ch):
+    def spikes(self,ch,sigma):
         """
         Runs a single FHN simulation and detects action potentials (spikes).
         
@@ -86,21 +87,32 @@ class ensemble_stats:
         if(ch == 1):
             v,w,v_e,w_e,J_e = simulation.deterministic(-1.00125,-0.46)
         elif(ch == 2):
-            v,w,v_e,w_e,J_e = simulation.additive_noise(-1.00125,-0.4)
+            v,w,v_e,w_e,J_e = simulation.additive_noise_fhn(-1.00125,-0.4, sigma)
         elif(ch == 3):
-            v,w,v_e,w_e,J_e = simulation.multiplicative_noise(-1.00125,-0.4)
+            v,w,v_e,w_e,J_e = simulation.multiplicative_noise(-1.00125,-0.4, sigma)
+        elif(ch == 4):
+            v = simulation.additive_noise_lif()
         else:
             print("Invalid Choice!")
         v_th = -0.55
 
         spike_times = []
-
-        for i in range(1, len(v)):
-            if v[i-1] < v_th and v[i] >= v_th:
-                spike_times.append(i)
+        if ch in [1, 3]:
+            for i in range(1, len(v)):
+                if v[i-1] < v_th and v[i] >= v_th:
+                    spike_times.append(i)
 
         #print("Number of spikes:", len(spike_times))
         #print("Spike Times: ",spike_times)
+
+        if (ch == 4):
+            v_peak = 20
+            I_ext, R, V_r, sigma, tau = path_calling_lif()
+            for i in range(1, len(v)):
+                if v[i] >= v_th:
+                    v[i-1] = v_peak         # Artificially draw the spike peak for your timeseries plot
+                    v[i] = V_r              # Reset the voltage instantly back to resting potential
+                    spike_times.append(i)
 
         return spike_times
     
