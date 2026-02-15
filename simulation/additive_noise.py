@@ -1,8 +1,10 @@
 import numpy as np
 from Models.FHN import FHN
-from simulation import path_calling
+from Models.LIF import LIF
+from simulation.path_calling import path_calling_fhn
+from simulation.path_calling import path_calling_lif
 
-def additive_noise(v0,w0, sigma):
+def additive_noise_fhn(v0,w0, sigma):
     """
     Simulates the FitzHugh-Nagumo (FHN) model with additive stochastic noise 
     using the Euler-Maruyama numerical method.
@@ -19,7 +21,7 @@ def additive_noise(v0,w0, sigma):
     """
 
     # Load model parameters from centralized config
-    I_ext,a,b,tau = path_calling()
+    I_ext,a,b,tau = path_calling_fhn()
     dt = 0.01        # timestep
     T = 1000           # total time
     steps = int(T/dt)
@@ -52,3 +54,22 @@ def additive_noise(v0,w0, sigma):
     #neuron.is_excitable()
 
     return v,w,v_e,w_e,J_e
+
+
+def additive_noise_lif():
+    dt = 0.01        # timestep
+    T = 1000           # total time
+    steps = int(T/dt)
+
+    I_ext, R, V_r, sigma, tau = path_calling_lif()
+
+    neuron_2 = LIF(I_ext,R, V_r, sigma, tau)
+    v = np.zeros(steps)
+
+    v[0] = V_r
+
+    for i in range(1, steps):
+        noise = sigma * np.random.normal(0, 1) * np.sqrt(dt)
+        v[i] = v[i-1] + neuron_2.leaky_integrate_and_fire_model(v[i-1])*dt + noise
+
+    return v
