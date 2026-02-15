@@ -5,7 +5,7 @@ This script serves as the primary controller for the simulation framework.
 It implements a decoupled architecture where the mathematical model selection 
 is independent of the visualization and analysis methods.
 
-Author: Nippani Meghana
+Author: NM
 Date: February 2026
 Project: Stochastic Dynamics in FitzHugh-Nagumo and LIF Models
 """
@@ -26,16 +26,16 @@ while(True):
     print("1. Deterministic FHN")
     print("2. Stochastive Additive FHN")
     print("3. Stochastive Multiplicative FHN")
-    print("4. Embedded LIF")
-    print("5. Exit")
-    ch = int(input('Please make your choice: '))
+    print("4. LIF")
+    print("5. Radical OU")
+    print("6. Exit")
 
     # Capture primary model choice. 
     # int() cast is necessary for numerical comparison in logic blocks.
     try:
         ch = int(input('Please make your choice: '))
     except ValueError:
-        print("Invalid input. Please enter a number between 1 and 5.")
+        print("Invalid input. Please enter a number between 1 and 6.")
         continue
 
     # REGIME PARAMETERS: 
@@ -45,7 +45,7 @@ while(True):
     if ch in [2, 3]:
         s = float(input("Please enter sigma value: "))
 
-    if(ch == 5):
+    if(ch == 6):
         print("Program Terminated!")
         sys.exit()
 
@@ -53,7 +53,6 @@ while(True):
     print("1. Phase Portrait")
     print("2. Ensemble Stats")
     print("3. Timeseries")
-    ch_data = int(input('Please make your choice: '))
 
     try:
         ch_data = int(input('Please make your choice: '))
@@ -89,7 +88,7 @@ while(True):
           - Fano Factor: Measure of spike count variability.
         """
             print('Printing Ensemble Stats...')
-            count, timing,isi,cv,fano_factor = stats.trials_stats(ch)
+            count, timing,isi,cv,fano_factor = stats.trials_stats(ch, s)
             print("Trials and Spike Count: ",count)
             print("ISI: ",isi)
             print("CV:",cv)
