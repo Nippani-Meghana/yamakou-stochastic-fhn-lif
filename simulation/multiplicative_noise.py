@@ -1,6 +1,6 @@
 import numpy as np
 from Models.FHN import FHN
-from simulation import path_calling
+from simulation.path_calling import path_calling_fhn
 
 def multiplicative_noise(v0,w0, sigma):
     """
@@ -18,7 +18,7 @@ def multiplicative_noise(v0,w0, sigma):
     Returns:
         tuple: (v, w, v_e, w_e, J_e) arrays of states, equilibrium points, and Jacobian.
     """
-    I_ext,a,b,tau = path_calling()
+    I_ext,a,b,tau = path_calling_fhn()
     dt = 0.01        # timestep
     T = 1000           # total time
     steps = int(T/dt)
