@@ -67,9 +67,18 @@ def additive_noise_lif():
     v = np.zeros(steps)
 
     v[0] = V_r
-
+    spike_times = []
     for i in range(1, steps):
         noise = sigma * np.random.normal(0, 1) * np.sqrt(dt)
         v[i] = v[i-1] + neuron_2.leaky_integrate_and_fire_model(v[i-1])*dt + noise
 
-    return v
+        v_th = -55.0
+        v_peak = 20
+
+        if v[i] >= v_th:
+                    v[i-1] = v_peak         # Draw peak
+                    v[i] = V_r              # Reset the current step
+                    spike_times.append(i)   # Record spike
+
+    # The array returned now has the actual spikes and resets built-in
+    return v, spike_times
