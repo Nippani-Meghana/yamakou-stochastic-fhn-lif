@@ -50,7 +50,7 @@ while(True):
         sys.exit()
 
     print('===DATA OUTPUT PERSPECTIVE===')
-    print("1. Phase Portrait")
+    print("1. Phase Portrait (Not available for LIF)")
     print("2. Ensemble Stats")
     print("3. Timeseries")
 
@@ -90,7 +90,7 @@ while(True):
             print('Printing Ensemble Stats...')
             count, timing,isi,cv,fano_factor = stats.trials_stats(ch, s)
             print("Trials and Spike Count: ",count)
-            print("ISI: ",isi)
+            #print("ISI: ",isi)
             print("CV:",cv)
             print("Fano Factor: ",fano_factor)
 
