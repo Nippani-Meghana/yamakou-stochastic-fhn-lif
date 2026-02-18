@@ -57,7 +57,7 @@ class ensemble_stats:
             if len(trial) > 1:
                 isi_trial = np.diff(trial)
                 cv_trial.append(np.std(isi_trial)/np.mean(isi_trial))
-                all_isi.extend(isi_trial)
+                all_isi.extend(isi_trial.tolist())
 
         if len(cv_trial) > 0:
             cv = np.mean(cv_trial)
@@ -91,13 +91,14 @@ class ensemble_stats:
         elif(ch == 3):
             v,w,v_e,w_e,J_e = simulation.multiplicative_noise(-1.00125,-0.4, sigma)
         elif(ch == 4):
-            v = simulation.additive_noise_lif()
+            v, spike_times = simulation.additive_noise_lif()
+            return spike_times
         else:
             print("Invalid Choice!")
         v_th = -0.55
 
         spike_times = []
-        if ch in [1, 3]:
+        if ch in [1,2, 3]:
             for i in range(1, len(v)):
                 if v[i-1] < v_th and v[i] >= v_th:
                     spike_times.append(i)
@@ -105,14 +106,6 @@ class ensemble_stats:
         #print("Number of spikes:", len(spike_times))
         #print("Spike Times: ",spike_times)
 
-        if (ch == 4):
-            v_peak = 20
-            I_ext, R, V_r, sigma, tau = path_calling_lif()
-            for i in range(1, len(v)):
-                if v[i] >= v_th:
-                    v[i-1] = v_peak         # Artificially draw the spike peak for your timeseries plot
-                    v[i] = V_r              # Reset the voltage instantly back to resting potential
-                    spike_times.append(i)
 
         return spike_times
     
