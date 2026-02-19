@@ -15,6 +15,9 @@ from visualization.timeseries import timeseries as plot_timeseries
 import Models
 import analysis
 import sys
+import numpy as np
+
+np.random.seed(42)
 
 # Initialize the statistical analysis engine.
 # This object handles multi-trial simulations to calculate metrics like 
@@ -53,6 +56,7 @@ while(True):
     print("1. Phase Portrait (Not available for LIF)")
     print("2. Ensemble Stats")
     print("3. Timeseries")
+    print("4. ISI Histogram")   
 
     try:
         ch_data = int(input('Please make your choice: '))
@@ -102,3 +106,13 @@ while(True):
         """
         plot_timeseries(ch,s)
 
+    elif(ch_data == 4):
+        """
+        ISI HISTOGRAM PERSPECTIVE
+        Visualizes the distribution of inter-spike intervals across trials.
+        Provides insight into the regularity and variability of firing patterns.
+        """
+        from visualization.isi_histogram import plot_isi_histogram
+        print("Generating ISI Histogram...")
+        _, _, all_isi, _, _ = stats.trials_stats(ch, s)
+        plot_isi_histogram(all_isi, ch, s)
