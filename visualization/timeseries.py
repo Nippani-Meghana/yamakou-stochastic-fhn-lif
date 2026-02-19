@@ -19,7 +19,7 @@ def timeseries(ch, sigma):
 
     elif(int(ch) == 4):
         from simulation.additive_noise import additive_noise_lif
-        results = additive_noise_lif()
+        results = additive_noise_lif(sigma)
 
     # 2. Extract data (Assuming all return v, w as the first two elements)
     v_data = results[0]
